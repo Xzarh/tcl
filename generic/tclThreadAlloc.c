@@ -637,11 +637,14 @@ TclThreadFreeObj(
 
     /*
      * If the number of free objects has exceeded the high water mark, move
-     * some blocks to the shared list.
+     * some blocks to the shared list. We choose to keep (NOBJALLOC/3) objs
+     * around as a compromise between "keep many so that you do not have to
+     * immediately alloc again" and "drain the cache in case this thread
+     * remains inactive for a long time".
      */
 
     if (cachePtr->numObjects > NOBJHIGH) {
-	PutObjs(cachePtr, NOBJALLOC);
+	PutObjs(cachePtr, cachePtr->numObjects - (NOBJALLOC/3));
     }
 }
 
